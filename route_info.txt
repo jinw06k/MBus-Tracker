@@ -1,0 +1,17 @@
+Routes: Bursley Baits - BB
+Routes: Commuter North - CN
+Routes: Commuter South - CS
+Routes: Crisler Express - CSX
+Routes: Diag-to-Diag Express - DD
+Routes: Med Express - MX
+Routes: North-East Shuttle - NES
+Routes: Northwood - NW
+Routes: Northwood Express - NX
+Routes: Oxford Shuttle - OS
+Routes: Wall Street-NIB - WS
+
+
+
+Stop for BB: C250 - Central Campus Transit Center: Chemistry
+Stop for NW: C251 - Central Campus Transit Center: Ruthven Museum
+Stop for CN: C250 - Central Campus Transit Center: Chemistry
