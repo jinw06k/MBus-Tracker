@@ -18,7 +18,8 @@ A JavaScript script was developed and integrated into my personal website, enabl
 
 ## ESP32 Testing
 C++ code was written for the ESP32 to test WiFi connectivity and API requests. Below is a video comparing the JSON data retrieved via ESP32 with the deployed web version.
-[![Video Placeholder](https://youtu.be/zxtD61-A_Fs)](https://youtu.be/zxtD61-A_Fs)
+
+[![Video Placeholder](https://img.youtube.com/vi/zxtD61-A_Fs/0.jpg)](https://youtu.be/zxtD61-A_Fs)
 
 ## Final Version
 Details will be updated soon.
