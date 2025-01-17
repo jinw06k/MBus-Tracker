@@ -3,11 +3,21 @@
 #include <HTTPClient.h>
 #include <string>
 #include <vector>
+#include <time.h>
+#include <TM1637Display.h>
+
+#define CLK 12
+#define DIO 14
+TM1637Display display = TM1637Display(CLK, DIO);
 
 const char* ssid = "";
 const char* password = "";
 const char* endpoint = "https://mbus.ltp.umich.edu/bustime/api/v3/getpredictions?key=";
 const char* key = "";
+
+const char* ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = -18000;
+const long daylightOffset_sec = 0;
 
 struct StopData {
   String routeId;
@@ -17,16 +27,21 @@ struct StopData {
   String arrivalTime;
 };
 
+std::vector<std::tuple<String, String, String>> northboundFromCCTC = {
+    {"BB", "NORTHBOUND", "C250"},
+    {"NW", "NORTHBOUND", "C251"},
+    {"CN", "NORTHBOUND", "C250"}
+};
+
 // get Json data from https GET
 void get_data(const String& url, DynamicJsonDocument& doc) {
     HTTPClient http;
     http.begin(url);
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
     http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-    int httpResponseCode = http.GET();
 
-//    Serial.println(url);
-//    Serial.println(httpResponseCode);
+    int httpResponseCode = http.GET();
+    // Serial.println("HTTP Response code: " + String(httpResponseCode));
 
     if (httpResponseCode == 302) {
         String redirectUrl = http.header("Location");
@@ -35,12 +50,25 @@ void get_data(const String& url, DynamicJsonDocument& doc) {
 
     if (httpResponseCode == 200) {
         String payload = http.getString();
-//        Serial.println(payload);
         deserializeJson(doc, payload);
     }
 
     http.end();
     return;
+}
+
+// get current time
+void get_current_time() {
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+  }
+  else{
+    Serial.println(&timeinfo, "Current Time - %H:%M:%S");
+  }
+
+  int curTime = timeinfo.tm_hour * 100 + timeinfo.tm_min;
+  display.showNumberDecEx(curTime, 0b01000000);
 }
 
 // connect to wifi
@@ -49,24 +77,28 @@ void setup() {
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
+
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    Serial.print("... ");
   }
   Serial.println("");
+
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
+
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  get_current_time();
+
+  display.clear();
+  display.setBrightness(7);
 }
 
 void loop() {
     if ((WiFi.status() == WL_CONNECTED)) { 
-
       std::vector<StopData> result;
-      std::vector<std::tuple<String, String, String>> northboundFromCCTC = {
-        {"BB", "NORTHBOUND", "C250"},
-        {"NW", "NORTHBOUND", "C251"},
-        {"CN", "NORTHBOUND", "C250"}
-      };
+
+      get_current_time();
 
       Serial.println("Calling info");
       DynamicJsonDocument doc(2048);
@@ -113,5 +145,3 @@ void loop() {
       delay(5000);
     }
 }
-
-
