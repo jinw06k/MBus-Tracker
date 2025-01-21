@@ -14,7 +14,8 @@ A Flask app was initially developed to test and monitor API requests.
 
 ## Web Deployment
 A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!](https://jinwook-shin.netlify.app/templates/bus-prediction)
-![Mobile Demo](/assets/images/final/MobileDemo.gif)
+
+<img src="/assets/images/final/MobileDemo.gif" width="400">
 
 ## ESP32 Testing
 C++ code was written for the ESP32 to test WiFi connectivity and API requests. Below is a video comparing the JSON data retrieved via ESP32 with the deployed web version.
