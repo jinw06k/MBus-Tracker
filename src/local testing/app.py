@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 import os
@@ -19,22 +19,26 @@ def get_data(api_key: str, base: str, **kw):
 
 @app.route("/predictions", methods=["GET"])
 def get_predictions():
-    """Return predictions for Northbound buses from CCTC as JSON"""
+    """Return predictions filtered by route (if specified) as JSON"""
     base = "getpredictions"
-    northbound_from_cctc = [["BB", "NORTHBOUND", "C250"], ["NW", "NORTHBOUND", "C251"], ["CN", "NORTHBOUND", "C250"]]
+    all_routes = [
+        ["BB", "NORTHBOUND", "C250"], ["CN", "NORTHBOUND", "C250"], ["CS", "SOUTHBOUND", "C250"],
+        ["DD", "SOUTHBOUND", "C250"], ["OS", "OUTBOUND", "C250"], ["NX", "SOUTHBOUND", "C250"],
+        ["NW", "NORTHBOUND", "C251"], ["NX", "NORTHBOUND", "C251"], ["DD", "NORTHBOUND", "C251"]
+    ]
     stop_names = {
         "C250": "CCTC South",
         "C251": "CCTC North"    
     }
-    
+    route_filter = request.args.get('route_id')
 
     result = []
-
-
-    for route_id, direction, stop_id in northbound_from_cctc:
+    for route_id, direction, stop_id in all_routes:
+        if route_filter and route_filter != "ALL" and route_filter != route_id:
+            continue
         prediction_data = get_data(api_key, base, rt=route_id, stpid=stop_id, tmres="s")
         
-        if "prd" in prediction_data["bustime-response"]:
+        if "prd" in prediction_data.get("bustime-response", {}):
             for prediction in prediction_data["bustime-response"]["prd"]:
                 if prediction["rtdir"] == direction:
                     result.append({
@@ -43,10 +47,13 @@ def get_predictions():
                         "direction": direction,
                         "stop_id": stop_id,
                         "vehicle_id": prediction['vid'],
-                        "arrival_time": prediction['prdctdn']
+                        "arrival_time": int(prediction['prdctdn']) if prediction['prdctdn'].isdigit() else 0
                     })
+
+    result.sort(key=lambda x: x["arrival_time"])
     
     return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

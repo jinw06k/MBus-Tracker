@@ -1,7 +1,5 @@
-// used for netlify deployment
-// currently deployed at https://jinwook-shin.netlify.app/templates/bus-prediction 
-
 import fetch from 'node-fetch'
+
 import axios from 'axios'
 // const axios = require('axios');
 import dotenv from 'dotenv';
@@ -24,28 +22,30 @@ async function getData(apiKey, base, params = {}) {
   }
 }
 
-//export const handler = async () => {
-// serverless function handler
-export const handler = async (event, context) => {
+export const handler = async (event) => {
   const base = 'getpredictions';
-  const northboundFromCctc = [
-    ['BB', 'NORTHBOUND', 'C250'],
-    ['NW', 'NORTHBOUND', 'C251'],
-    ['CN', 'NORTHBOUND', 'C250'],
+  const allRoutes = [
+    ['BB', 'NORTHBOUND', 'C250'], ['CN', 'NORTHBOUND', 'C250'], ['CS', 'SOUTHBOUND', 'C250'],
+    ['DD', 'SOUTHBOUND', 'C250'], ['OS', 'OUTBOUND', 'C250'], ['NX', 'SOUTHBOUND', 'C250'],
+    ['NW', 'NORTHBOUND', 'C251'], ['NX', 'NORTHBOUND', 'C251'], ['DD', 'NORTHBOUND', 'C251']
   ];
-
   const stopNames = {
     C250: 'CCTC South',
     C251: 'CCTC North',
   };
 
+  const routeFilter = event.queryStringParameters?.route_id;
   const result = [];
 
   try {
-    for (const [routeId, direction, stopId] of northboundFromCctc) {
+    for (const [routeId, direction, stopId] of allRoutes) {
+      if (routeFilter && routeFilter !== 'ALL' && routeFilter !== routeId) {
+        continue;
+      }
+
       const predictionData = await getData(apiKey, base, { rt: routeId, stpid: stopId, tmres: 's' });
 
-      if (predictionData['bustime-response'] && predictionData['bustime-response']['prd']) {
+      if (predictionData['bustime-response']?.prd) {
         for (const prediction of predictionData['bustime-response']['prd']) {
           if (prediction.rtdir === direction) {
             result.push({
@@ -54,12 +54,14 @@ export const handler = async (event, context) => {
               direction: direction,
               stop_id: stopId,
               vehicle_id: prediction.vid,
-              arrival_time: prediction.prdctdn,
+              arrival_time: Number(prediction.prdctdn) || 0,
             });
           }
         }
       }
     }
+
+    result.sort((a, b) => a.arrival_time - b.arrival_time);
 
     return {
       statusCode: 200,
