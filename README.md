@@ -10,11 +10,11 @@ This repository contains the source code for a real-time MBus tracker specifical
 
 ## Local Testing
 A Flask app was initially developed to test and monitor API requests.
-![Testing Image](/assets/images/testing.png)
+![Testing Image](/assets/images/old/testing.png)
 
 ## Web Deployment
 A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!](https://jinwook-shin.netlify.app/templates/bus-prediction)
-![Web Image](/assets/images/web.png)
+![Web Image](/assets/images/final/WideScreen.png)
 
 ## ESP32 Testing
 C++ code was written for the ESP32 to test WiFi connectivity and API requests. Below is a video comparing the JSON data retrieved via ESP32 with the deployed web version.
