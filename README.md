@@ -10,7 +10,8 @@ This repository contains the source code for a real-time MBus tracker specifical
 
 ## Local Testing
 A Flask app was initially developed to test and monitor API requests.
-![Testing Image](/assets/images/old/testing.png)
+
+<img src="/assets/images/old/testing.png" width="500">
 
 ## Web Deployment
 A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!](https://jinwook-shin.netlify.app/templates/bus-prediction)
@@ -31,5 +32,6 @@ Details will be updated soon.
 
 - [x] Local testing
 - [x] Deploy to Netlify
+- [x] Enhance Mobile View
 - [x] ESP32 testing on serial monitor
 - [ ] Connect to final hardware setup
