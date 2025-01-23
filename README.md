@@ -17,7 +17,7 @@ A Flask app was initially developed to test and monitor API requests.
 <img src="/assets/images/old/testing.png" width="500">
 
 ## Web Deployment
-A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!](https://jinwook-shin.netlify.app/templates/bus-prediction)
+A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!]([https://jinwook-shin.netlify.app/templates/bus-prediction](http://jinwookshin.com/templates/bus-prediction))
 
 <img src="/assets/images/final/MobileDemo.gif" width="400">
 
