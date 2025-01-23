@@ -6,7 +6,7 @@ This repository contains the source code for a real-time MBus tracker specifical
 
 ## Hardware Requirements
 - ESP32
-- 7seg Display
+- 7-seg Display
 - SN74HC595 Shift Register
 - Jumper cables
 - Additional requirements to be updated.
