@@ -21,12 +21,18 @@ A JavaScript script was developed and integrated into my personal website, enabl
 
 <img src="/assets/images/final/MobileDemo.gif" width="400">
 
-## ESP32 Testing
+## ESP32 Testing #1: Serial Testing
 C++ code was written for the ESP32 to test WiFi connectivity and API requests. Below is a video comparing the JSON data retrieved via ESP32 with the deployed web version.
 
 (https://youtu.be/zxtD61-A_Fs)
 
 [![Video Placeholder](https://img.youtube.com/vi/zxtD61-A_Fs/0.jpg)](https://youtu.be/zxtD61-A_Fs)
+
+## ESP32 Testing #2: Rotary Cncoder Testing
+Rotary Encoder added - Jan. 28
+(https://www.youtube.com/shorts/zzOmB_uZ6Bs)
+
+[![Video Placeholder](https://img.youtube.com/vi/zzOmB_uZ6Bs/0.jpg)](https://www.youtube.com/shorts/zzOmB_uZ6Bs)
 
 ## Final Version
 Details will be updated soon.
