@@ -9,8 +9,8 @@
 // ------------------------------------
 // Rotary Encoder
 // ------------------------------------
-#define CH_A 4
-#define CH_B 21
+#define CH_A 22
+#define CH_B 23
 unsigned long _lastIncReadTime = micros();
 unsigned long _lastDecReadTime = micros();
 int _pauseLength = 25000;
@@ -86,6 +86,65 @@ void get_current_time() {
 // END Current Time Display
 // ------------------------------------
 
+// ------------------------------------
+// 7 Segment Display
+// ------------------------------------
+#define dataPin 4
+#define clockPin 19
+#define latchPin 21
+byte num[] {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x00};
+bool busAvailable = false;
+
+void displayNumber(int number) {
+
+  if(busAvailable){
+    Serial.print("@7seg -- Earliest ETA: ");
+    Serial.println(number);
+    
+    int tens = number / 10;
+    int ones = number % 10;
+
+    if(tens == 0) tens = 10;
+    
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, num[ones]);
+    shiftOut(dataPin, clockPin, MSBFIRST, num[tens]);
+    digitalWrite(latchPin, HIGH);
+  }
+  else{
+    Serial.println("@7seg -- no bus available");
+    
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 64);
+    shiftOut(dataPin, clockPin, MSBFIRST, 64);
+    digitalWrite(latchPin, HIGH);
+  }
+}
+// ------------------------------------
+// END 7 Segment Display
+// ------------------------------------
+
+// ------------------------------------
+// RGB LED
+// ------------------------------------
+#define RED_LED 14
+#define GREEN_LED 12
+#define BLUE_LED 13
+// BB green, NW red, CN purple
+int red[] = {255, 30, 100};
+int green[] = {30, 255, 255};
+int blue[] = {255, 255, 100};
+void setLED(int route) {
+  Serial.print("@RGB -- Setting LED light for route #");
+  Serial.println(route);
+  Serial.println("@RGB -- BB = 0, NW = 1, CN = 2");
+  analogWrite(RED_LED, red[route]);
+  analogWrite(GREEN_LED, green[route]);
+  analogWrite(BLUE_LED, blue[route]);
+}
+// ------------------------------------
+// END RGB LED
+// ------------------------------------
 
 // ------------------------------------
 // WiFi
@@ -103,7 +162,7 @@ void connectWiFi(){
   }
   Serial.println("");
 
-  Serial.print("Connected to WiFi network with IP Address: ");
+  Serial.print("@WiFi -- Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 }
 // ------------------------------------
@@ -155,7 +214,7 @@ void get_data(const String& url, DynamicJsonDocument& doc) {
     return;
 }
 
-void predict_bus(std::tuple<String, String, String> entry) {
+int predict_bus(std::tuple<String, String, String> entry) {
   String routeId, dir, stopId;
   std::tie(routeId, dir, stopId) = entry;
 
@@ -164,6 +223,8 @@ void predict_bus(std::tuple<String, String, String> entry) {
   get_data(url, doc);
 
   std::vector<StopData> result;
+
+  int earliestArrival = 1000;
 
   if (doc.containsKey("bustime-response")) {
     JsonObject response = doc["bustime-response"];
@@ -181,11 +242,21 @@ void predict_bus(std::tuple<String, String, String> entry) {
               prediction["prdctdn"].as<String>()
             };
             result.push_back(stopData);
+
+            int tmp = 0;
+            if(stopData.arrivalTime == "DUE") {
+              tmp = 0;
+            } else {
+              tmp = stopData.arrivalTime.toInt();
+            }
+
+            earliestArrival = std::min(earliestArrival, tmp);
           }
         }
     }
   }
 
+  Serial.println("@predict bus -- ");
   for (const auto& stopData : result) {
         Serial.println("Route ID: " + stopData.routeId);
         Serial.println("Direction: " + stopData.dir);
@@ -194,6 +265,7 @@ void predict_bus(std::tuple<String, String, String> entry) {
         Serial.println("Arrival Time: " + stopData.arrivalTime);
         Serial.println();
   }
+  return earliestArrival;
 }
 // ------------------------------------
 // END API, Bus Prediction
@@ -216,26 +288,56 @@ void setup() {
   pinMode(CH_B, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(CH_A), read_encoder, CHANGE);
   attachInterrupt(digitalPinToInterrupt(CH_B), read_encoder, CHANGE);
+
+  // 7 Segment Display
+  pinMode(clockPin, OUTPUT);
+  pinMode(latchPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
+
+  // RGB LED
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
 }
 
 int reloadTime = 0;
 #define RELOAD_INTERVAL 10000
+
+int eta = 0;
+
 void loop() {
 
   static int lastCounter = 0;
   if (counter != lastCounter) {
-    Serial.println(counter);
     Serial.print("Route: ");
     Serial.println(std::get<0>(northboundFromCCTC[counter]));
     lastCounter = counter;
     reloadTime = RELOAD_INTERVAL;
+    setLED(counter);
   }
   
   if ((reloadTime >= RELOAD_INTERVAL) && (WiFi.status() == WL_CONNECTED)) { 
     Serial.println("###########################");
     Serial.println("Predicting bus...");
-    predict_bus(northboundFromCCTC[counter]);
+    eta = predict_bus(northboundFromCCTC[counter]);
     Serial.println("###########################");
+
+    if (eta == 1000) {
+      Serial.println("No bus available");
+      busAvailable = false;
+    }
+    else {
+      Serial.print("Earliest Arrival: ");
+      Serial.println(eta);
+      busAvailable = true;
+    }
+    busAvailable = true;
+    displayNumber(15);
+    delay(1000);
+    displayNumber(8);
+    delay(1000);
+    busAvailable = false;
+    displayNumber(eta);
     reloadTime = 0;
   }
 
