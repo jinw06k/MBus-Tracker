@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <time.h>
+#include <utility> 
 #include <TM1637Display.h>
 
 // ------------------------------------
@@ -95,31 +96,34 @@ void get_current_time() {
 byte num[] {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x00};
 bool busAvailable = false;
 
-void displayNumber(int number) {
+void displayNumber(std::pair<int,int> arrivalTimes) {
 
-  if(busAvailable){
+  digitalWrite(latchPin, LOW);
+  shiftNum(arrivalTimes.second);
+  shiftNum(arrivalTimes.first);
+  digitalWrite(latchPin, HIGH);
+}
+
+void shiftNum(int number){
+  if(number == 1000){
+    Serial.println("@7seg -- no bus available");
+    shiftOut(dataPin, clockPin, MSBFIRST, 64);
+    shiftOut(dataPin, clockPin, MSBFIRST, 64);
+  }
+  else{
     Serial.print("@7seg -- Earliest ETA: ");
     Serial.println(number);
-    
+
     int tens = number / 10;
     int ones = number % 10;
 
     if(tens == 0) tens = 10;
     
-    digitalWrite(latchPin, LOW);
     shiftOut(dataPin, clockPin, MSBFIRST, num[ones]);
     shiftOut(dataPin, clockPin, MSBFIRST, num[tens]);
-    digitalWrite(latchPin, HIGH);
-  }
-  else{
-    Serial.println("@7seg -- no bus available");
-    
-    digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, MSBFIRST, 64);
-    shiftOut(dataPin, clockPin, MSBFIRST, 64);
-    digitalWrite(latchPin, HIGH);
   }
 }
+
 // ------------------------------------
 // END 7 Segment Display
 // ------------------------------------
@@ -214,7 +218,7 @@ void get_data(const String& url, DynamicJsonDocument& doc) {
     return;
 }
 
-int predict_bus(std::tuple<String, String, String> entry) {
+std::pair<int,int> predict_bus(std::tuple<String, String, String> entry) {
   String routeId, dir, stopId;
   std::tie(routeId, dir, stopId) = entry;
 
@@ -224,7 +228,7 @@ int predict_bus(std::tuple<String, String, String> entry) {
 
   std::vector<StopData> result;
 
-  int earliestArrival = 1000;
+  std::pair<int,int> earliestArrival = {1000,1000};
 
   if (doc.containsKey("bustime-response")) {
     JsonObject response = doc["bustime-response"];
@@ -242,18 +246,16 @@ int predict_bus(std::tuple<String, String, String> entry) {
               prediction["prdctdn"].as<String>()
             };
             result.push_back(stopData);
-
-            int tmp = 0;
-            if(stopData.arrivalTime == "DUE") {
-              tmp = 0;
-            } else {
-              tmp = stopData.arrivalTime.toInt();
-            }
-
-            earliestArrival = std::min(earliestArrival, tmp);
           }
         }
     }
+  }
+
+  if(result.size() >= 1) {
+    earliestArrival.first = string_to_int(result[0].arrivalTime);
+  }
+  if(result.size() >= 2) {
+    earliestArrival.second = string_to_int(result[1].arrivalTime);
   }
 
   Serial.println("@predict bus -- ");
@@ -265,8 +267,20 @@ int predict_bus(std::tuple<String, String, String> entry) {
         Serial.println("Arrival Time: " + stopData.arrivalTime);
         Serial.println();
   }
+
   return earliestArrival;
 }
+
+int string_to_int(String str) {
+  int tmp = 0;
+  if(str == "DUE") {
+    tmp = 0;
+  } else {
+    tmp = str.toInt();
+  }
+  return tmp;
+}
+
 // ------------------------------------
 // END API, Bus Prediction
 // ------------------------------------
@@ -303,7 +317,7 @@ void setup() {
 int reloadTime = 0;
 #define RELOAD_INTERVAL 10000
 
-int eta = 0;
+std::pair<int,int> eta = {1000,1000};
 
 void loop() {
 
@@ -321,22 +335,6 @@ void loop() {
     Serial.println("Predicting bus...");
     eta = predict_bus(northboundFromCCTC[counter]);
     Serial.println("###########################");
-
-    if (eta == 1000) {
-      Serial.println("No bus available");
-      busAvailable = false;
-    }
-    else {
-      Serial.print("Earliest Arrival: ");
-      Serial.println(eta);
-      busAvailable = true;
-    }
-    busAvailable = true;
-    displayNumber(15);
-    delay(1000);
-    displayNumber(8);
-    delay(1000);
-    busAvailable = false;
     displayNumber(eta);
     reloadTime = 0;
   }
