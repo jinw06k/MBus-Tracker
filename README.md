@@ -8,7 +8,9 @@ This repository contains the source code for a real-time MBus tracker specifical
 - ESP32
 - 7-seg Display
 - SN74HC595 Shift Register
-- Jumper cables
+- Rotary Encoder
+- Resistors (220Ω)
+- Wires
 - Additional requirements to be updated.
 
 ## Local Testing
@@ -35,7 +37,10 @@ Rotary Encoder added - Jan. 28
 [![Video Placeholder](https://img.youtube.com/vi/zzOmB_uZ6Bs/0.jpg)](https://www.youtube.com/shorts/zzOmB_uZ6Bs)
 
 ## Final Version
-Details will be updated soon.
+The final version of the board allows tracking of three bus routes. A rotary encoder can be used to switch between routes, and the RGB LED displays the representative color of the current route. Two sets of 7-segment displays show the estimated arrival times for the next two available buses. With built-in WiFi connectivity, the ESP32 eliminates the need for a computer connection, making the board fully stand-alone.
+(https://youtube.com/shorts/56vkLiOQles)
+
+[![Video Placeholder](https://img.youtube.com/vi/56vkLiOQles/0.jpg)](https://www.youtube.com/shorts/56vkLiOQles)
 
 ## Todo
 
@@ -43,4 +48,5 @@ Details will be updated soon.
 - [x] Deploy to Netlify
 - [x] Enhance Mobile View
 - [x] ESP32 testing on serial monitor
-- [ ] Connect to final hardware setup
+- [x] Connect to final hardware setup
+- [ ] Add alphanumeric display for bus route info
