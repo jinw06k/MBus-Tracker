@@ -1,5 +1,6 @@
-# On Time Every Time - Live MBus Tracker
+<img src="/assets/images/final/frontpage.png">
 
+# On Time Every Time - Live MBus Tracker
 This repository contains the source code for a real-time MBus tracker specifically for Northbound buses at the Central Campus Transit Center. It was developed to help me and my roommate stay on schedule for buses heading to North Campus for classes.
 
 [Magic Bus API](https://mbus.ltp.umich.edu/home) is provided by UM Transit at the University of Michigan - Ann Arbor.
