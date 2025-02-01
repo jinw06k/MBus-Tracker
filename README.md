@@ -1,5 +1,6 @@
-# On Time Every Time - Live MBus Tracker
+<img src="/assets/images/final/frontpage.png">
 
+# On Time Every Time - Live MBus Tracker
 This repository contains the source code for a real-time MBus tracker specifically for Northbound buses at the Central Campus Transit Center. It was developed to help me and my roommate stay on schedule for buses heading to North Campus for classes.
 
 [Magic Bus API](https://mbus.ltp.umich.edu/home) is provided by UM Transit at the University of Michigan - Ann Arbor.
@@ -21,7 +22,7 @@ A Flask app was initially developed to test and monitor API requests.
 ## Web Deployment
 A JavaScript script was developed and integrated into my personal website, enabling my roommates and me to access it on our phones. [Check it out here!](http://jinwookshin.com/templates/bus-prediction)
 
-<img src="/assets/images/final/MobileDemo.gif" width="400">
+<img src="/assets/images/final/web/MobileDemo.gif" width="400">
 
 ## ESP32 Testing #1: Serial Testing
 C++ code was written for the ESP32 to test WiFi connectivity and API requests. Below is a video comparing the JSON data retrieved via ESP32 with the deployed web version.
